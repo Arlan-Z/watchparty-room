@@ -6,7 +6,7 @@ import MessageBox from './MessageBox';
 import './Chat.css';
 
 import { io } from 'socket.io-client';
-const socket = io('http://localhost:7890');
+const socket = io("/");
 
 interface ChatProps {
     roomId: string;
@@ -26,7 +26,7 @@ export default function Chat({ roomId }: ChatProps) {
         };
         socket.on('receive_message', receiveMessageHandler);
 
-        fetch(`http://localhost:7890/api/chat/${roomId}`)
+        fetch(`/api/chat/${roomId}`)
             .then(res => res.json())
             .then(data => {
                 if (Array.isArray(data)) {
