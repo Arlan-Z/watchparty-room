@@ -5,8 +5,13 @@ import MessageBox from './MessageBox';
 import ChatFooter from './ChatFooter';
 import userUtils from '../../../../utils/userUtils';
 
-export default function Chat() {
+interface ChatProps {
+    roomId: string
+};
+
+export default function Chat({ roomId } : ChatProps) {
     const [messages, setMessages] = useState<Message[]>([]);
+    console.log(roomId);
 
     const createMessageFunction = (message: Message) => {
         setMessages([...messages, message]);

@@ -7,7 +7,8 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<PlaceholderPage />} />
-      <Route path='/room' element={<RoomPage />}></Route>
+      <Route path="/room/:id" element={<RoomPage />} />
+      <Route path="*" element={<PlaceholderPage placeholderText='404'/>} />
     </Routes>
   )
 }
