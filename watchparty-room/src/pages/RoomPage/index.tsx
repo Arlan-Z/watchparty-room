@@ -16,7 +16,7 @@ const messages : Message[] = [
 
 export default function RoomPage() {
   return (
-    // <Chat messages={messages} currentUserId={currentUserId}/>
-    <Video src="https://www.pexels.com/download/video/6548176/"/>
+    <Chat messages={messages} currentUserId={currentUserId}/>
+    // <Video src="https://www.pexels.com/download/video/6548176/"/>
   );
 }
