@@ -1,18 +1,22 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv, type ConfigEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 
-export default defineConfig({
-  plugins: [react()],
-  server: {
-    proxy: {
-      "/api": {
-        target: "http://localhost:7890",
-        changeOrigin: true,
-      },
-      "/socket.io": {
-        target: "http://localhost:7890",
-        ws: true, 
+export default ({ mode } : ConfigEnv) => {
+  const env = loadEnv(mode, process.cwd(), '')
+
+  return defineConfig({
+    plugins: [react()],
+    server: {
+      proxy: {
+        '/api': {
+          target: env.VITE_CHAT_API_URL, 
+          changeOrigin: true,
+        },
+        '/socket.io': {
+          target: env.VITE_CHAT_API_URL,
+          ws: true,
+        },
       },
     },
-  },
-})
+  })
+}
