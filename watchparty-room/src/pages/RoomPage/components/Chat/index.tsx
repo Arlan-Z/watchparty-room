@@ -1,22 +1,22 @@
 import type Message from '../../../../models/message';
 import './Chat.css';
+import { useState } from 'react'
+import MessageBox from './MessageBox';
+import ChatFooter from './ChatFooter';
+import userUtils from '../../../../utils/userUtils';
 
-interface chatProps {
-    messages: Message[],
-    currentUserId: string
-}
+export default function Chat() {
+    const [messages, setMessages] = useState<Message[]>([]);
 
-export default function Chat({ messages = [], currentUserId }: chatProps) {
+    const createMessageFunction = (message: Message) => {
+        setMessages([...messages, message]);
+    };
+
+
     return (
         <div className="chat-wrapper">
-            {messages.map((msg, index) => {
-                return (
-                    <>
-                    <p className='msg-sender-id'>{msg.senderId}</p>
-                    <div className={`message ${msg.senderId === currentUserId ? "current" : "other"}`} key={index}>{msg.content}</div>
-                    </>
-                );
-            })}
+            <MessageBox messages={messages} currentUserId={userUtils.getUserId()}/>
+            <ChatFooter createMessageFunction={createMessageFunction} currentUserId={userUtils.getUserId()}/>
         </div>
     );
 }
