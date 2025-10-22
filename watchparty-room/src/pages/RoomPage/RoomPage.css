@@ -1,0 +1,52 @@
+.room-page-wrapper {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100vh; 
+  padding: 24px; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  gap: 32px;
+}
+
+.video-box {
+  flex: 1 1 0; 
+  min-width: 320px; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.5);
+}
+
+.video-box video {
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
+  display: block;
+  object-fit: contain; 
+  aspect-ratio: 16 / 9;
+  border-radius: 12px;
+  background: black;
+}
+
+.chat-box {
+  width: 360px;          
+  min-width: 260px;     
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-card);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+}
+
+.chat-box > .chat-wrapper,
+.chat-box > .message-box-wrapper {
+  flex: 1;
+  overflow-y: auto;
+}

@@ -12,7 +12,6 @@ export default function Chat() {
         setMessages([...messages, message]);
     };
 
-
     return (
         <div className="chat-wrapper">
             <MessageBox messages={messages} currentUserId={userUtils.getUserId()}/>
