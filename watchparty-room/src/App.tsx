@@ -7,7 +7,7 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<PlaceholderPage />} />
-      <Route path="/room/:id" element={<RoomPage />} />
+      <Route path="/room/:roomId" element={<RoomPage />} />
       <Route path="*" element={<PlaceholderPage placeholderText='404 PAGE NOT FOUND'/>} />
     </Routes>
   )

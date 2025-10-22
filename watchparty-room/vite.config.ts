@@ -8,10 +8,9 @@ export default ({ mode }: ConfigEnv) => {
     plugins: [react()],
     server: {
       proxy: {
-        '/chat': {
-          target: env.VITE_MESSAGE_API_URL,
+        '/api/chat': {
+          target: env.VITE_CHAT_API_URL,
           changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/api/, ''),
         },
       },
     },

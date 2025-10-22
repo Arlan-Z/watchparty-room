@@ -1,30 +1,25 @@
 import { useRef } from 'react'
 import './ChatFooter.css'
-import type Message from '../../../../../models/message';
 
 interface ChatFooterProps {
-    createMessageFunction: (message: Message) => void,
-    currentUserId: string
+    sendMessage: (content: string) => void;
 }
 
-export default function ChatFooter({ createMessageFunction, currentUserId }: ChatFooterProps) {
+export default function ChatFooter({ sendMessage }: ChatFooterProps) {
     const textInput = useRef<HTMLInputElement>(null);
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>): void => {
         if (e.key === 'Enter') {
             e.preventDefault(); 
-            sendMessage();
+            CreateMessage();
         }
     };
 
-    const sendMessage = (): void => {
+    const CreateMessage = (): void => {
         const message = textInput.current?.value.trim();
         if (!message) return;
 
-        createMessageFunction({
-            senderId: currentUserId,
-            content: message,
-        });
+        sendMessage(message);
 
         textInput.current!.value = '';
     };
@@ -38,7 +33,7 @@ export default function ChatFooter({ createMessageFunction, currentUserId }: Cha
                 onKeyDown={handleKeyDown}
             />
 
-            <button className="chat-send-btn" onClick={sendMessage}>Send</button>
+            <button className="chat-send-btn" onClick={CreateMessage}>Send</button>
         </div>
     )
 }
