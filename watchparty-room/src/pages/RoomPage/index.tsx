@@ -6,11 +6,13 @@ export default function RoomPage() {
   return (
     <div className="room-page-wrapper">
       <div className="video-box">
-        <Video src="https://www.pexels.com/download/video/6548176/"/>
+        <div className="video-wrapper">
+          <Video src="https://www.pexels.com/download/video/6548176/" />
+        </div>
       </div>
-      
+
       <div className="chat-box">
-        <Chat/>
+        <Chat />
       </div>
     </div>
   );
