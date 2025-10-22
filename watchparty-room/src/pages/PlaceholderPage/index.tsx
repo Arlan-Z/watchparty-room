@@ -1,10 +1,10 @@
 import './Placeholder.css';
 
-export default function PlaceholderPage() {
+export default function PlaceholderPage({ placeholderText } : { placeholderText?: string}) {
   return (
     <div className="placeholder-page-wrapper">
       <div className="message-box">
-        Welcome to WatchParty
+        {placeholderText ?? 'Welcome to WatchParty'}
       </div>
 
       <div className="join-room-form-box">
