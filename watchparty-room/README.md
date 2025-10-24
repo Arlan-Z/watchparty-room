@@ -1,73 +1,64 @@
-# React + TypeScript + Vite
+# WatchParty Room Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+WatchParty Room is a Vite-powered React application that renders the participant experience for a synchronized watch party. It provides a shared video player alongside a realtime group chat, letting viewers join a specific room and interact while watching the same content.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Room-aware routing** – Uses React Router to resolve room identifiers from the `/room/:roomId` route and gracefully handles missing rooms with a placeholder screen.
+- **Embedded video playback** – Renders a hosted MP4 stream inside the `Video` component so everyone in the room watches the same video feed.
+- **Realtime chat** – Connects to a Socket.IO server, joins the current room, and streams new messages into the chat timeline while persisting history via a REST fetch.
+- **Persistent user identity** – Generates a browser-stored UUID so each participant keeps a consistent sender identity across refreshes.
+- **Responsive layout** – Splits the interface into video and chat columns that scale for common desktop breakpoints.
 
-## React Compiler
+## Getting started
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Prerequisites
 
-## Expanding the ESLint configuration
+- Node.js 18 or newer.
+- npm 9+ (ships with Node 18). Yarn/PNPM also work but the supplied scripts assume npm.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Installation
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Useful scripts
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Starts the Vite dev server on <http://localhost:5173>. Proxies should forward `/api/*` and Socket.IO traffic to your backend. |
+| `npm run build` | Produces an optimized production build in `dist/`. |
+| `npm run preview` | Serves the built assets locally to verify the production bundle. |
+| `npm run lint` | Runs the ESLint configuration for the project. |
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Development notes
+
+- The chat module expects a Socket.IO server reachable at the same origin (the client calls `io('/')`). Configure a Vite proxy or run the frontend behind the same domain as the backend.
+- Chat history is loaded from `GET /api/chat/:roomId`. Adjust the `fetch` call in `src/pages/RoomPage/components/Chat/index.tsx` if your backend exposes a different route.
+- The sample video source comes from Pexels and is suitable for development only. Swap the `src` prop passed to the `Video` component to point to your own HLS/MP4 stream for production use.
+- User identifiers are generated and cached via `src/utils/userUtils.ts`. If your authentication model differs, integrate your auth provider there so every message carries the correct sender metadata.
+
+## Project structure
+
 ```
+src/
+├── App.tsx                  # Route definitions
+├── pages/
+│   ├── PlaceholderPage/     # Generic placeholder and error screen
+│   └── RoomPage/            # Room layout combining Video + Chat
+│       └── components/
+│           ├── Video/       # Video player wrapper
+│           └── Chat/        # Chat timeline, footer, and message rendering
+├── models/                  # Shared TypeScript interfaces (e.g., Message)
+└── utils/                   # Helpers such as user identity persistence
+```
+
+## Contributing
+
+1. Fork and clone the repository.
+2. Create a feature branch.
+3. Run `npm run lint` and `npm run build` before opening a pull request.
+4. Submit the PR with a summary of the change and testing performed.
+
+Feel free to open issues for bugs or feature requests.
