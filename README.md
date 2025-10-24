@@ -53,8 +53,8 @@ src/
 
 ## Project Screenshots
 ### Welcome Page
-![alt text](img\welcome.png)
+![alt text](img/welcome.png)
 ### Error Page
-![alt text](img\404.png)
+![alt text](img/404.png)
 ### Room Page
-![alt text](img\room.png)
+![alt text](img/room.png)
