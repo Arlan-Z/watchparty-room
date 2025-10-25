@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type Message from "../../../../models/message";
+import type Message from "./models/message";
 import userUtils from "../../../../utils/userUtils";
 import ChatFooter from "./ChatFooter";
 import MessageBox from "./MessageBox";

@@ -1,6 +1,6 @@
 // src/services/chatSocketService.ts
 import { io, Socket } from "socket.io-client";
-import type Message from "../../../../../models/message";
+import type Message from "../models/message";
 
 class ChatService {
   private socket: Socket | null = null;

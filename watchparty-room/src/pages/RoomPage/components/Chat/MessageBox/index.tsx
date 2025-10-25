@@ -1,4 +1,4 @@
-import type Message from '../../../../../models/message';
+import type Message from '../models/message';
 import './MessageBox.css';
 
 interface chatProps {
