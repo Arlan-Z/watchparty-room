@@ -1,8 +1,15 @@
 import React, { useRef, useState, useEffect } from 'react';
 import './Video.css';
 import { FaPlay, FaPause, FaVolumeUp, FaVolumeMute, FaExpand, FaCog } from 'react-icons/fa';
+import { io } from "socket.io-client";
 
-const Video = ({ src }: { src: string }) => {
+const socket = io("/", {
+  path: "/stream-service/socket.io",
+  transports: ["websocket"],
+  autoConnect: true,
+});
+
+const Video = ({ src, roomId }: { src: string; roomId: string }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(1);
@@ -11,15 +18,47 @@ const Video = ({ src }: { src: string }) => {
   const [showControls, setShowControls] = useState(true);
   let controlsTimeout: ReturnType<typeof setTimeout>;
 
+  useEffect(() => {
+      socket.emit("joinRoom", { roomId });
+
+      socket.on("videoEvent", ({ type, currentTime }) => {
+        const video = videoRef.current;
+        if (!video) return;
+
+        switch (type) {
+          case "play":
+            video.currentTime = currentTime;
+            video.play();
+            setIsPlaying(true);
+            break;
+          case "pause":
+            video.pause();
+            setIsPlaying(false);
+            break;
+          case "seek":
+            video.currentTime = currentTime;
+            break;
+        }
+      });
+
+      return () => {
+        socket.off("videoEvent");
+      };
+    }, [roomId]);
+
+
   const handlePlayPause = () => {
-    if (videoRef.current) {
-      if (videoRef.current.paused) {
-        videoRef.current.play();
-        setIsPlaying(true);
-      } else {
-        videoRef.current.pause();
-        setIsPlaying(false);
-      }
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (video.paused) {
+      video.play();
+      setIsPlaying(true);
+      socket.emit("videoEvent", { roomId, type: "play", currentTime: video.currentTime });
+    } else {
+      video.pause();
+      setIsPlaying(false);
+      socket.emit("videoEvent", { roomId, type: "pause", currentTime: video.currentTime });
     }
   };
 
@@ -49,10 +88,11 @@ const Video = ({ src }: { src: string }) => {
   };
 
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const seekTime = (parseFloat(e.target.value) / 100) * (videoRef.current?.duration || 0);
-    if (videoRef.current) {
-      videoRef.current.currentTime = seekTime;
-    }
+    const video = videoRef.current;
+    if (!video) return;
+    const seekTime = (parseFloat(e.target.value) / 100) * (video.duration || 0);
+    video.currentTime = seekTime;
+    socket.emit("videoEvent", { roomId, type: "seek", currentTime: seekTime });
   };
 
   const toggleFullScreen = () => {

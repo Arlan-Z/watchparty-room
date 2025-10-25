@@ -3,7 +3,7 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  height: 60vh; 
+  height: 90vh; 
   flex-direction: column;
 }
 
@@ -13,24 +13,38 @@
   margin-bottom: 2.5rem;
 }
 
-.join-room-form-box {
+.form {
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
   background-color: var(--bg-card);
   border-radius: 1.5rem;
-  padding: 1.5rem 3rem 3rem 3rem;
   width: 100%;
   max-width: 400px;
   border: 1px solid var(--border-color);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.join-room-form-box label {
+.form.join-room {
+  padding: 1.5rem 3rem 3rem 3rem;
+}
+
+.form.create-room {
+  padding: 3rem 3rem 1.5rem 3rem;
+}
+
+.form label {
   font-size: 1.125rem;
   font-weight: 400;
+}
+
+.join-room label {
   margin-bottom: 0.5rem;
+}
+
+.create-room label {
+  margin-top: 0.5rem;
 }
 
 #join-btn {
@@ -43,19 +57,22 @@
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
-  margin-top: 1rem;
   width: 100%;
   transition: all 0.2s;
+}
+
+.join-room #join-btn {
+  margin-top: 1rem;
+}
+
+.create-room #join-btn {
+  margin-bottom: 1rem;
 }
 
 #join-btn:hover:not(:disabled) {
   background-color: var(--accent-hover);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(92, 183, 83, 0.3);
-}
-
-#join-btn:hover:not(:disabled) {
-  transform: translateY(0);
 }
 
 #join-btn:active:not(:disabled) {
@@ -77,4 +94,33 @@
 #room-id-input:focus {
   outline: none;
   border-color: var(--accent-primary);
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 400px;
+  margin: 1.5rem 0;
+  position: relative;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background-color: var(--border-color);
+  margin: 0 1rem;
+  opacity: 0.5;
+}
+
+.divider span {
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }

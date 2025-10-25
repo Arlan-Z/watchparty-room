@@ -19,6 +19,17 @@ export default ({ mode }: ConfigEnv) => {
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/chat-service\/socket.io/, '/socket.io'),
         },
+        '/stream-service/api': {
+          target: env.VITE_ROOM_API_URL,
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/stream-service\/api/, '/api'),
+        },
+        '/stream-service/socket.io': {
+          target: env.VITE_ROOM_API_URL,
+          ws: true,
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/stream-service\/socket.io/, '/socket.io'),
+        },
       },
     },
   })

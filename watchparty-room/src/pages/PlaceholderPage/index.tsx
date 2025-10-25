@@ -7,10 +7,20 @@ export default function PlaceholderPage({ placeholderText } : { placeholderText?
         {placeholderText ?? 'Welcome to WatchParty'}
       </div>
 
-      <div className="join-room-form-box">
+      <div className="form join-room">
         <label htmlFor="room-id-input">Enter room ID</label>
         <input type="text" name='room-id-input' id='room-id-input'/>
         <button id='join-btn'>Join</button>
+      </div>
+
+      <div className="divider">
+        <span>or</span>
+      </div>
+
+      <div className="form create-room">
+        <button id='join-btn'>Create</button>
+        <input type="text" name='room-id-input' id='room-id-input'/>
+        <label htmlFor="room-id-input">Enter video URL</label>
       </div>
     </div>
   );
