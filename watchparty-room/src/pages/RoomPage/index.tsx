@@ -14,7 +14,7 @@ export default function RoomPage() {
     <div className="room-page-wrapper">
       <div className="video-box">
         <div className="video-wrapper">
-          <Video src="https://www.pexels.com/download/video/6548176/" roomId={roomId}/>
+          <Video roomId={roomId}/>
         </div>
       </div>
 

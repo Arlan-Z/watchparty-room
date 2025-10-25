@@ -9,14 +9,29 @@ const socket = io("/", {
   autoConnect: true,
 });
 
-const Video = ({ src, roomId }: { src: string; roomId: string }) => {
+const Video = ({ roomId }: { roomId: string }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
   const [progress, setProgress] = useState(0);
   const [showControls, setShowControls] = useState(true);
+  const [videoUrl, setVideoUrl] = useState<string>('');
+
   let controlsTimeout: ReturnType<typeof setTimeout>;
+
+  useEffect(() => {
+  fetch(`/stream-service/api/rooms/${roomId}`)
+    .then(res => res.json())
+    .then(data => {
+      if (data?.videoUrl) setVideoUrl(data.videoUrl);
+      else alert("⚠️ Video not found for this room");
+    })
+    .catch(err => {
+      console.error("Failed to load video:", err);
+      alert("⚠️ Failed to load video from server");
+    });
+  }, [roomId]);
 
   useEffect(() => {
       socket.emit("joinRoom", { roomId });
@@ -44,8 +59,7 @@ const Video = ({ src, roomId }: { src: string; roomId: string }) => {
       return () => {
         socket.off("videoEvent");
       };
-    }, [roomId]);
-
+  }, [roomId]);
 
   const handlePlayPause = () => {
     const video = videoRef.current;
@@ -109,12 +123,14 @@ const Video = ({ src, roomId }: { src: string; roomId: string }) => {
 
   const handleMouseMove = () => {
     setShowControls(true);
+
     clearTimeout(controlsTimeout);
-    controlsTimeout = setTimeout(() => {
-        if(isPlaying) {
-            setShowControls(false);
-        }
-    }, 3000);
+
+    if (isPlaying) {
+      controlsTimeout = setTimeout(() => {
+        setShowControls(false);
+      }, 3000);
+    }
   };
 
   useEffect(() => {
@@ -135,11 +151,11 @@ const Video = ({ src, roomId }: { src: string; roomId: string }) => {
   }, []);
 
   return (
-    <div className="video-container" onMouseMove={handleMouseMove} onMouseLeave={() => isPlaying && setShowControls(false)}>
+    <div className="video-container" onMouseMove={handleMouseMove} onMouseLeave={() => isPlaying && setShowControls(false)}  onMouseEnter={() => setShowControls(true)}>
       <video
         ref={videoRef}
         className="video-player"
-        src={src}
+        src={videoUrl}
         onClick={handlePlayPause}
       />
       <div className={`video-controls ${showControls ? 'visible' : ''}`}>
