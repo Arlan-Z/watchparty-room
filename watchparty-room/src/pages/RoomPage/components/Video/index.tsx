@@ -30,10 +30,28 @@ const Video = ({ roomId }: { roomId: string }) => {
 
   useEffect(() => {
     socket.emit("joinRoom", { roomId });
+
+    socket.on("syncState", ({ videoUrl, currentTime, isPlaying }) => {
+      const video = videoRef.current;
+      if (!video) return;
+
+      if (videoUrl) setVideoUrl(videoUrl);
+      video.currentTime = currentTime || 0;
+
+      if (isPlaying) {
+        video.play();
+        setIsPlaying(true);
+      } else {
+        video.pause();
+        setIsPlaying(false);
+      }
+    });
+
     subscribeToVideoEvents(socket, videoRef, setIsPlaying);
 
     return () => {
       socket.off("videoEvent");
+      socket.off("syncState");
     };
   }, [roomId, socket]);
 
