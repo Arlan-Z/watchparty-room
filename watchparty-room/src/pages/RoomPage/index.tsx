@@ -3,37 +3,15 @@ import Chat from "./components/Chat";
 import Video from "./components/Video";
 import './RoomPage.css';
 import PlaceholderPage from "../PlaceholderPage";
-import { useEffect, useState } from "react";
 import Loading from "../../components/Loading";
+import { useRoomCheck } from "./hooks/useRoomCheck";
 
 export default function RoomPage() {
   const { roomId } = useParams();
-  const [roomExists, setRoomExists] = useState<boolean | null>(null);
-
-   
-  useEffect(() => {
-    if (!roomId) {
-      setRoomExists(false);
-      return;
-    }
-
-    fetch(`/stream-service/api/rooms/${roomId}`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Room not found");
-        return res.json();
-      })
-      .then((data) => {
-        if (data && data.id) {
-          setRoomExists(true);
-        } else {
-          setRoomExists(false);
-        }
-      })
-      .catch(() => setRoomExists(false));
-  }, [roomId]);
+  const { roomExists } = useRoomCheck(roomId);
 
   if (roomExists === null) {
-    return <Loading/>
+    return <Loading />;
   }
 
   if (!roomExists) {
