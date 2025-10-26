@@ -1,13 +1,14 @@
-import React, { useRef, useState, useEffect } from 'react';
-import './Video.css';
-import { FaPlay, FaPause, FaVolumeUp, FaVolumeMute, FaExpand, FaCog } from 'react-icons/fa';
-import { io } from "socket.io-client";
-
-const socket = io("/", {
-  path: "/stream-service/socket.io",
-  transports: ["websocket"],
-  autoConnect: true,
-});
+import React, { useRef, useState, useEffect } from "react";
+import "./Video.css";
+import {
+  FaPlay,
+  FaPause,
+  FaVolumeUp,
+  FaVolumeMute,
+  FaExpand,
+  FaCog,
+} from "react-icons/fa";
+import { emitVideoEvent, fetchVideoUrl, initSocket, subscribeToVideoEvents } from "./services/videoService";
 
 const Video = ({ roomId }: { roomId: string }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -16,50 +17,25 @@ const Video = ({ roomId }: { roomId: string }) => {
   const [isMuted, setIsMuted] = useState(false);
   const [progress, setProgress] = useState(0);
   const [showControls, setShowControls] = useState(true);
-  const [videoUrl, setVideoUrl] = useState<string>('');
+  const [videoUrl, setVideoUrl] = useState<string>("");
 
+  const socket = initSocket();
   let controlsTimeout: ReturnType<typeof setTimeout>;
 
   useEffect(() => {
-  fetch(`/stream-service/api/rooms/${roomId}`)
-    .then(res => res.json())
-    .then(data => {
-      if (data?.videoUrl) setVideoUrl(data.videoUrl);
-      else alert("⚠️ Video not found for this room");
-    })
-    .catch(err => {
-      console.error("Failed to load video:", err);
-      alert("⚠️ Failed to load video from server");
-    });
+    fetchVideoUrl(roomId)
+      .then((url) => setVideoUrl(url))
+      .catch((err) => alert("⚠️ " + err.message));
   }, [roomId]);
 
   useEffect(() => {
-      socket.emit("joinRoom", { roomId });
+    socket.emit("joinRoom", { roomId });
+    subscribeToVideoEvents(socket, videoRef, setIsPlaying);
 
-      socket.on("videoEvent", ({ type, currentTime }) => {
-        const video = videoRef.current;
-        if (!video) return;
-
-        switch (type) {
-          case "play":
-            video.currentTime = currentTime;
-            video.play();
-            setIsPlaying(true);
-            break;
-          case "pause":
-            video.pause();
-            setIsPlaying(false);
-            break;
-          case "seek":
-            video.currentTime = currentTime;
-            break;
-        }
-      });
-
-      return () => {
-        socket.off("videoEvent");
-      };
-  }, [roomId]);
+    return () => {
+      socket.off("videoEvent");
+    };
+  }, [roomId, socket]);
 
   const handlePlayPause = () => {
     const video = videoRef.current;
@@ -68,11 +44,11 @@ const Video = ({ roomId }: { roomId: string }) => {
     if (video.paused) {
       video.play();
       setIsPlaying(true);
-      socket.emit("videoEvent", { roomId, type: "play", currentTime: video.currentTime });
+      emitVideoEvent(socket, roomId, "play", video.currentTime);
     } else {
       video.pause();
       setIsPlaying(false);
-      socket.emit("videoEvent", { roomId, type: "pause", currentTime: video.currentTime });
+      emitVideoEvent(socket, roomId, "pause", video.currentTime);
     }
   };
 
@@ -94,10 +70,8 @@ const Video = ({ roomId }: { roomId: string }) => {
 
   const handleProgress = () => {
     if (videoRef.current) {
-      const duration = videoRef.current.duration;
-      const currentTime = videoRef.current.currentTime;
-      const progress = (currentTime / duration) * 100;
-      setProgress(progress);
+      const { duration, currentTime } = videoRef.current;
+      setProgress((currentTime / duration) * 100);
     }
   };
 
@@ -106,97 +80,91 @@ const Video = ({ roomId }: { roomId: string }) => {
     if (!video) return;
     const seekTime = (parseFloat(e.target.value) / 100) * (video.duration || 0);
     video.currentTime = seekTime;
-    socket.emit("videoEvent", { roomId, type: "seek", currentTime: seekTime });
+    emitVideoEvent(socket, roomId, "seek", seekTime);
   };
 
   const toggleFullScreen = () => {
     if (videoRef.current) {
-        if (!document.fullscreenElement) {
-            videoRef.current.parentElement?.requestFullscreen().catch(err => {
-            alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
-          });
-        } else {
-          document.exitFullscreen();
-        }
+      if (!document.fullscreenElement) {
+        videoRef.current.parentElement?.requestFullscreen();
+      } else {
+        document.exitFullscreen();
       }
+    }
   };
 
   const handleMouseMove = () => {
     setShowControls(true);
-
     clearTimeout(controlsTimeout);
-
     if (isPlaying) {
-      controlsTimeout = setTimeout(() => {
-        setShowControls(false);
-      }, 3000);
+      controlsTimeout = setTimeout(() => setShowControls(false), 3000);
     }
   };
 
   useEffect(() => {
-    const videoElement = videoRef.current;
-    if (videoElement) {
-      videoElement.addEventListener('timeupdate', handleProgress);
-      videoElement.addEventListener('play', () => setIsPlaying(true));
-      videoElement.addEventListener('pause', () => setIsPlaying(false));
-    }
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.addEventListener("timeupdate", handleProgress);
+    video.addEventListener("play", () => setIsPlaying(true));
+    video.addEventListener("pause", () => setIsPlaying(false));
 
     return () => {
-      if (videoElement) {
-        videoElement.removeEventListener('timeupdate', handleProgress);
-        videoElement.removeEventListener('play', () => setIsPlaying(true));
-        videoElement.removeEventListener('pause', () => setIsPlaying(false));
-      }
+      video.removeEventListener("timeupdate", handleProgress);
     };
   }, []);
 
   return (
-    <div className="video-container" onMouseMove={handleMouseMove} onMouseLeave={() => isPlaying && setShowControls(false)}  onMouseEnter={() => setShowControls(true)}>
+    <div
+      className="video-container"
+      onMouseMove={handleMouseMove}
+      onMouseLeave={() => isPlaying && setShowControls(false)}
+    >
       <video
         ref={videoRef}
         className="video-player"
         src={videoUrl}
         onClick={handlePlayPause}
       />
-      <div className={`video-controls ${showControls ? 'visible' : ''}`}>
+      <div className={`video-controls ${showControls ? "visible" : ""}`}>
         <div className="progress-bar-wrapper">
-            <input
+          <input
             type="range"
             min="0"
             max="100"
             value={progress}
             className="progress-bar"
             onChange={handleSeek}
-            />
+          />
         </div>
         <div className="controls-row">
-            <div className="controls-left">
-                <button onClick={handlePlayPause} className="control-button">
-                    {isPlaying ? <FaPause /> : <FaPlay />}
-                </button>
-                <div className="volume-control">
-                    <button onClick={toggleMute} className="control-button">
-                        {isMuted || volume === 0 ? <FaVolumeMute /> : <FaVolumeUp />}
-                    </button>
-                    <input
-                        type="range"
-                        min="0"
-                        max="1"
-                        step="0.01"
-                        value={isMuted ? 0 : volume}
-                        className="volume-slider"
-                        onChange={handleVolumeChange}
-                    />
-                </div>
+          <div className="controls-left">
+            <button onClick={handlePlayPause} className="control-button">
+              {isPlaying ? <FaPause /> : <FaPlay />}
+            </button>
+            <div className="volume-control">
+              <button onClick={toggleMute} className="control-button">
+                {isMuted || volume === 0 ? <FaVolumeMute /> : <FaVolumeUp />}
+              </button>
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                value={isMuted ? 0 : volume}
+                className="volume-slider"
+                onChange={handleVolumeChange}
+              />
             </div>
-            <div className="controls-right">
-                <button className="control-button">
-                    <FaCog />
-                </button>
-                <button onClick={toggleFullScreen} className="control-button">
-                    <FaExpand />
-                </button>
-            </div>
+          </div>
+          <div className="controls-right">
+            <button className="control-button">
+              <FaCog />
+            </button>
+            <button onClick={toggleFullScreen} className="control-button">
+              <FaExpand />
+            </button>
+          </div>
         </div>
       </div>
     </div>
