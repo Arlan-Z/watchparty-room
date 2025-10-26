@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import type Message from "./models/message";
 import userUtils from "../../../../utils/userUtils";
-import ChatFooter from "./ChatFooter";
-import MessageBox from "./MessageBox";
+import ChatFooter from "./components/ChatFooter";
+import MessageBox from "./components/MessageBox";
 import "./Chat.css";
 import chatSocketService from "./services/chatService";
 
