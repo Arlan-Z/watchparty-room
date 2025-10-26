@@ -58,16 +58,16 @@ export default function PlaceholderPage({ placeholderText } : { placeholderText?
       </div>
 
       <div className="form create-room">
-        <button id='join-btn' onClick={handleCreateRoom}>Create</button>
+        <button id='create-btn' onClick={handleCreateRoom}>Create</button>
         <input 
           type="text" 
-          name='room-id-input' 
-          id='room-id-input'
+          name='video-url-input' 
+          id='video-url-input'
           value={videoUrl}
           onChange={(e) => setVideoUrl(e.target.value)}
         />
 
-        <label htmlFor="room-id-input">Enter video URL</label>
+        <label htmlFor="video-url-input">Enter video URL</label>
       </div>
     </div>
   );

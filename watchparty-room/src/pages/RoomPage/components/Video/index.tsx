@@ -18,7 +18,8 @@ const Video = ({ roomId }: { roomId: string }) => {
   } = useVideoPlayer();
 
   const [videoUrl, setVideoUrl] = useState("");
-  const socket = initSocket();
+  const socketRef = React.useRef(initSocket());
+  const socket = socketRef.current;
 
   useRoomSocket(roomId, videoRef, setVideoUrl, setIsPlaying);
 
